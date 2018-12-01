@@ -2,7 +2,7 @@
 //          MoonPrism - markdown.js
 // -------------------------------------------
 function markdown(input){
-    let img_cdn = "";
+    let img_cdn = "http://img.xiezai.org";
     let text = input.replace(/(\r\n|\n|\r)/g, "\n")
                 .replace( /&/g, "&amp;" )
                 .replace( /</g, "&lt;" )
@@ -28,6 +28,12 @@ function markdown(input){
                     .replace(/&copyc;/g, '~')
                     .replace(/&copye;/g, '[');
     };
+    let random_color = function (){
+        var r = Math.floor(Math.random()*255);
+        var g = Math.floor(Math.random()*255);
+        var b = Math.floor(Math.random()*255);
+        return 'rgba('+ r +','+ g +','+ b +',0.8)';
+    }
     let code_lan,
         code_block_index = false;
     // code
@@ -101,7 +107,7 @@ function markdown(input){
                     _html += "<p>"+to_str+"</p>";
                     to_str = "";
                 }
-                _html += '<blockquote>'+line_reg(bq[1]);
+                _html += '<blockquote style="border-left-color:'+random_color()+'">'+line_reg(bq[1]);
                 block[i] = '';
                 while( i<=block.length - 1 ){
                     _html += line_reg(block[i])+'<br>';
@@ -132,25 +138,26 @@ function markdown(input){
                 block[i] = '';
             } else if ( (pre = block[i].match(/^\|(.+?)\|$/)) !== null ) {
                 // table
-                let table_align_text, table_align;
+                let table_align_text, table_style;
                 if ( block[i+1] && (table_align_text = block[i+1].match(/^\|([-:\|\s]+?)\|$/)) !== null ) {
-                    table_align = table_align_text[1].split('|');
-                    for (let tai = 0; tai < table_align.length; tai++) {
-                        let ta_text = table_align[tai].replace(/^\s+|\s+$/g,"");
+                    table_style = table_align_text[1].split('|');
+                    for (let tai = 0; tai < table_style.length; tai++) {
+                        let ta_text = table_style[tai].replace(/^\s+|\s+$/g,"");
                         if (ta_text.substring(0,1) == ':' && ta_text.substring(ta_text.length-1) == ':') {
-                            table_align[tai] = 'style="text-align: center;"';
+                            // feature
+                            table_style[tai] = 'style="text-align: center;width:'+(ta_text.length-2)*15+'px"';
                         } else if (ta_text.substring(0,1) == ':') {
-                            table_align[tai] = 'style="text-align: left;"';
+                            table_style[tai] = 'style="text-align: left;width:'+(ta_text.length-1)*15+'px"';
                         } else if (ta_text.substring(ta_text.length-1) == ':') {
-                            table_align[tai] = 'style="text-align: right;"';
+                            table_style[tai] = 'style="text-align: right;width:'+(ta_text.length-1)*15+'px"';
                         } else {
-                            table_align[tai] = '';
+                            table_style[tai] = 'style="width:'+(ta_text.length)*15+'px"';
                         }
                     }
                     _html += '<table><tr>';
                     let ths = pre[1].split('|');
                     for (let thi = 0; thi < ths.length; thi++) {
-                        _html += '<th '+table_align[thi]+'>'+ths[thi]+'</th>';
+                        _html += '<th '+table_style[thi]+'>'+line_reg(ths[thi])+'</th>';
                     }
                     _html += '</tr>';
                     i++;
@@ -159,7 +166,7 @@ function markdown(input){
                             _html += '<tr>';
                             let ths = pre[1].split('|');
                             for (let thi = 0; thi < ths.length; thi++) {
-                                _html += '<td '+table_align[thi]+'>'+ths[thi]+'</td>';
+                                _html += '<td '+table_style[thi]+'>'+line_reg(ths[thi])+'</td>';
                             }
                             _html += '</tr>';
                         }
